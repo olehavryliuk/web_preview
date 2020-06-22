@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Web Preview</title>
+		<style>
+			html, body { margin: 0; height: 100%; display: block;}
+			canvas { width:100%; height: 100%;  display: block;  }
+		</style>
+	</head>
+	<body>
+
+		<script type="module">
+		
+			import * as THREE from './build/three.module.js';
+			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+
+			var scene = new THREE.Scene();
+
+			var camera = new THREE.PerspectiveCamera();
+
+			var renderer = new THREE.WebGLRenderer(/*{canvas}*/);
+			//renderer.setSize( window.innerWidth, window.innerHeight );
+			const canvas = renderer.domElement;
+			document.body.appendChild( canvas );
+			
+			renderer.physicallyCorrectLights = true;
+			
+			var loader = new GLTFLoader();
+
+			loader.load(
+				// resource URL
+				'Preview.gltf',
+				// called when the resource is loaded
+				function ( gltf ) {
+
+					scene.add( gltf.scene );
+
+					camera = gltf.cameras[0]; // Array<THREE.Camera>
+					camera.aspect = canvas.clientWidth / canvas.clientHeight;
+					camera.updateProjectionMatrix();
+				},
+				// called while loading is progressing
+				function ( xhr ) {
+
+					console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+				},
+				// called when loading has errors
+				function () {
+
+					console.log( 'An error happened' );
+
+				}
+			);
+
+			function resizeRendererToDisplaySize(renderer) {
+				const canvas = renderer.domElement;
+				const width = canvas.clientWidth;
+				const height = canvas.clientHeight;
+				const needResize = canvas.width !== width || canvas.height !== height;
+				if (needResize) {
+					renderer.setSize(width, height, true);
+				}
+				return needResize;
+			}			
+			
+			function animate() {
+				if (resizeRendererToDisplaySize(renderer)) {
+					const canvas = renderer.domElement;
+					camera.aspect = canvas.clientWidth / canvas.clientHeight;
+					camera.updateProjectionMatrix();
+				}				
+				
+				renderer.render( scene, camera );
+				
+				requestAnimationFrame( animate );
+			}
+			animate();
+		</script>
+		
+	</body>
+</html>
